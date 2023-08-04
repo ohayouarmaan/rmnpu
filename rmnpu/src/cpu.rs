@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 use crate::memory;
 
+pub enum Instructions {
+    MOV_LITERAL_R1,
+}
+
 #[derive(Debug)]
 pub struct cpu {
     pub memory: memory::memory,
@@ -29,8 +33,15 @@ impl cpu {
         self.memory.mem[addr]
     }
 
+    pub fn fetch_16bites(&mut self) -> u16 {
+        let current_ip_value = self.get_register("ip");
+        let ins = self.memory.mem[current_ip_value as usize];
+        self.set_register("ip", current_ip_value + 1);
+        return ins;
+    }
 
-    pub fn set_register(&mut self, name: &str, value: u16) {
+
+    pub fn set_register(&mut self, name: &str, value: u16) -> &mut Self {
         match self.register_map.get(name) {
             Some(ke) => {
                 self.register.mem[*ke] = value;
@@ -39,9 +50,10 @@ impl cpu {
                 panic!("Can't assign.");
             }
         }
+        return self;
     }
 
-    pub fn get_register(&mut self, name: &str) -> u16 {
+    pub fn get_register(&self, name: &str) -> u16 {
         match self.register_map.get(name) {
             Some(ke) => {
                 self.register.mem[*ke]
@@ -53,8 +65,27 @@ impl cpu {
     }
 
     //TODO: Implement an enum with all the instructions
-    pub fn decode(&self) {
+    pub fn execute(&mut self, ins: Instructions) {
+        match ins {
+            Instructions::MOV_LITERAL_R1 => {
+                let lit_value = self.fetch_16bites();
+                self.set_register("r1", lit_value);
+            }
+        }
+    }
 
+    pub fn step(&mut self) {
+        self.set_register("ip", 0x00);
+        let ins = self.fetch_16bites();
+        let mut ins = match ins {
+            0x00 => {
+                Instructions::MOV_LITERAL_R1
+            }
+            _ => {
+                panic!("wtf");
+            }
+        };
+        self.execute(ins);
     }
 
 }
