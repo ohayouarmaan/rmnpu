@@ -3,10 +3,22 @@ mod cpu;
 
 fn main() {
     let mut m = memory::memory::new(2048);
-    m.mem[0] = 0x00;
-    m.mem[1] = 0xFF;
+    let mut i = 0;
+
+    m.mem[i] = 0x00;
+    i += 1;
+    m.mem[i] = 0xF1;
+    i += 1;
+    m.mem[i] = 0x02;
+    i += 1;
+    m.mem[i] = 0x03;
+    i += 1;
+    m.mem[i] = 0x01;
+
     let mut c = cpu::cpu::new(m);
-    println!("current r1 value: {}", c.get_register("r1"));
+    c.debug();
     c.step();
-    println!("current r1 value: {}", c.get_register("r1"));
+    c.debug();
+    c.step();
+    c.debug();
 }
